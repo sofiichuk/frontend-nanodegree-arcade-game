@@ -1,59 +1,139 @@
-// Enemies our player must avoid
-let Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+// 'use strict'
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
-    this.sprite = 'images/enemy-bug.png';
+const playingField = {
+    width: 500,
+    height: 600
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
-Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
+const cell = {
+    width: 100,
+    height: 85
 };
 
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
+const river = {
+    height: 85
+};
+
+const character = {
+    width: 100,
+    height: 100
+};
+
+const initialPosition = {
+    x: 200,
+    y: 385
+};
+
+// ===========================================================
+
+const Enemy = function (x, y, speed, sprite) {
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+    this.sprite = sprite
+};
+
+Enemy.prototype.update = function (dt) {
+    if (this.x <= playingField.width) {
+        this.x = this.speed * dt + this.x;
+    } else {
+        this.x = 0;
+    }
+    this.detectCollision();
+};
+
+Enemy.prototype.detectCollision = function () {
+    if (player.x <= this.x + character.width &&
+        player.x + character.width >= this.x &&
+        player.y <= this.y + character.height &&
+        player.y + character.height >= this.y) {
+        player.reset()
+    }
+};
+
+Enemy.prototype.render = function () {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-let Player=function(x, y){
-    this.sprite='images/char-boy.png';
-    this.x=x;
-    this.y=y;
-};
-Player.prototype.update=function(){
+// ===========================================================
 
+const Player = function (x, y) {
+    this.x = x;
+    this.y = y;
+    this.moveSideways = cell.width;
+    this.moveAhead = cell.height;
+    this.sprite = 'images/char-boy.png';
+    // this.reset();
 };
 
-Player.prototype.render = function() {
+Player.prototype.update = function () {
+    this.scored();
+};
+
+Player.prototype.scored = function () {
+    this.count = 0;
+    if ((this.y < 0)) {
+        this.count += 1;
+        score.textContent = `your score is: ${this.count}`;
+    }
+};
+
+Player.prototype.reset = function () {
+    score.textContent = `wasted`;
+    this.x = initialPosition.x;
+    this.y = initialPosition.y;
+};
+
+Player.prototype.render = function () {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-let player = new Player(200, 385);
-// class Player {
-//     constructor{}
-// }
+Player.prototype.handleInput = function (key) {
+    switch (key) {
+        case 'up':
+            this.y -= this.moveAhead;
+            if (this.y < 0) {
+                this.y = initialPosition.y;
+            }
+            break;
+        case 'down':
+            this.y += this.moveAhead;
+            if (this.y > initialPosition.y) {
+                this.y = initialPosition.y;
+            }
+            break;
+        case 'left':
+            this.x -= this.moveSideways;
+            if (this.x < 0) {
+                this.x = 0;
+            }
+            break;
+        case 'right':
+            this.x += this.moveSideways;
+            if (this.x > playingField.width - cell.width) {
+                this.x = playingField.width - cell.width;
+            }
+            break;
+    }
+};
 
+// ===========================================================
 
-// Now instantiate your objects.
-let enemy1 = new Enemy;
-const allEnemies = [enemy1];
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+const score = document.createElement('h3');
+score.textContent = 'your score is: 0';
+document.body.append(score);
 
+// ===========================================================
 
+const player = new Player(200, 385);
+const enemy1 = new Enemy(0, 225, 100, 'images/enemy-bug.png');
+const enemy2 = new Enemy(0, 142, 200, 'images/enemy-bug.png');
+const enemy3 = new Enemy(0, 60, 150, 'images/enemy-bug.png');
+const allEnemies = [enemy1, enemy2, enemy3];
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
+// ===========================================================
+
+document.addEventListener('keyup', function (e) {
     let allowedKeys = {
         37: 'left',
         38: 'up',
