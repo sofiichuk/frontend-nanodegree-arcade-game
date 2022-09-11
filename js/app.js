@@ -1,5 +1,3 @@
-// 'use strict'
-
 const playingField = {
     width: 500,
     height: 600
@@ -15,22 +13,30 @@ const river = {
 };
 
 const character = {
-    width: 100,
-    height: 100
+    width: 60,
+    height: 60
 };
 
-const initialPosition = {
+const initialPlayerPosition = {
     x: 200,
     y: 385
 };
 
+let count = 0;
+
 // ===========================================================
 
-const Enemy = function (x, y, speed, sprite) {
+const score = document.createElement('h3');
+score.textContent = 'your score is: 0';
+document.body.append(score);
+
+// ===========================================================
+
+const Enemy = function (x, y, speed) {
     this.x = x;
     this.y = y;
     this.speed = speed;
-    this.sprite = sprite
+    this.sprite = 'images/enemy-bug.png'
 };
 
 Enemy.prototype.update = function (dt) {
@@ -63,7 +69,6 @@ const Player = function (x, y) {
     this.moveSideways = cell.width;
     this.moveAhead = cell.height;
     this.sprite = 'images/char-boy.png';
-    // this.reset();
 };
 
 Player.prototype.update = function () {
@@ -71,17 +76,18 @@ Player.prototype.update = function () {
 };
 
 Player.prototype.scored = function () {
-    this.count = 0;
-    if ((this.y < 0)) {
-        this.count += 1;
-        score.textContent = `your score is: ${this.count}`;
+    if (this.y < river.height) {
+        count++;
+        score.textContent = `your score is: ${count}`;
+        this.x = initialPlayerPosition.x;
+        this.y = initialPlayerPosition.y;
     }
 };
 
 Player.prototype.reset = function () {
-    score.textContent = `wasted`;
-    this.x = initialPosition.x;
-    this.y = initialPosition.y;
+    score.textContent = 'wasted';
+    this.x = initialPlayerPosition.x;
+    this.y = initialPlayerPosition.y;
 };
 
 Player.prototype.render = function () {
@@ -93,13 +99,13 @@ Player.prototype.handleInput = function (key) {
         case 'up':
             this.y -= this.moveAhead;
             if (this.y < 0) {
-                this.y = initialPosition.y;
+                this.y = 0;
             }
             break;
         case 'down':
             this.y += this.moveAhead;
-            if (this.y > initialPosition.y) {
-                this.y = initialPosition.y;
+            if (this.y > initialPlayerPosition.y) {
+                this.y = initialPlayerPosition.y;
             }
             break;
         case 'left':
@@ -119,16 +125,12 @@ Player.prototype.handleInput = function (key) {
 
 // ===========================================================
 
-const score = document.createElement('h3');
-score.textContent = 'your score is: 0';
-document.body.append(score);
+const player = new Player(initialPlayerPosition.x, initialPlayerPosition.y);
 
-// ===========================================================
-
-const player = new Player(200, 385);
-const enemy1 = new Enemy(0, 225, 100, 'images/enemy-bug.png');
-const enemy2 = new Enemy(0, 142, 200, 'images/enemy-bug.png');
-const enemy3 = new Enemy(0, 60, 150, 'images/enemy-bug.png');
+// const Enemy = function (x, y, speed)
+const enemy1 = new Enemy(0, 225, 100);
+const enemy2 = new Enemy(0, 142, 200);
+const enemy3 = new Enemy(0, 60, 150);
 const allEnemies = [enemy1, enemy2, enemy3];
 
 // ===========================================================
